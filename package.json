@@ -5,8 +5,12 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "jest --runInBand --forceExit"
+    "test": "jest --runInBand --forceExit --ci --reporters=default --reporters=jest-junit"
   },
+  "jest-junit": {
+    "outputDirectory": "./",
+    "outputName": "junit.xml"
+  }
   "dependencies": {
     "express": "^4.19.2"
   },
