@@ -1,19 +1,44 @@
 name: "Application Pipeline"
 
+# 1. Déclencheurs avancés
 on:
   push:
+  workflow_dispatch:
+    inputs:
+      target_sub_env:
+        description: 'Sous-environnement cible (ex: sandbox)'
+        required: false
+        type: string
+  schedule:
+    - cron: '0 0 * * *' # Tous les jours à minuit UTC
 
+# 2. Contrôle du cycle de vie (Limitation de concurrence)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 3. Durcissement des privilèges (Hardening)
 permissions:
   contents: read
   checks: write
+  security-events: write # Requis pour publier le rapport SAST CodeQL
+  actions: read          # Requis pour que CodeQL lise le statut des actions
 
 jobs:
-  validate-code:
+  # --- JOB 1 : VALIDATION TECHNIQUE ---
+  build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # Verrou temporel de sécurité contre les scripts infinis
     
     steps:
       - name: Récupération du code
         uses: actions/checkout@v5
+
+      # 4. Initialisation du scanner de sécurité CodeQL
+      - name: Initialisation de CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'javascript'
 
       - name: Configuration de Node.js 22
         uses: actions/setup-node@v5
@@ -42,11 +67,24 @@ jobs:
         if: always()
         with:
           report_paths: '**/junit.xml'
-          
-      - name: Vérification des variables et secrets
+
+      # 4. Lancement de l'analyse des failles CodeQL
+      - name: Analyse de sécurité CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+
+  # --- JOB 2 : DÉPLOIEMENT EN PRODUCTION ---
+  deploy-staging-prod:
+    needs: build-and-test # Sépare les responsabilités : ne s'exécute QUE si le Job 1 réussit
+    runs-on: ubuntu-latest
+    environment: "production" # Lie ce job à l'environnement protégé GitHub
+    
+    steps:
+      - name: Simulation du déploiement
         env:
-          ENV_SIMPLE: ${{ vars.APP_ENVIRONMENT }}
+          ENV_CIBLE: ${{ inputs.target_sub_env || vars.APP_ENVIRONMENT }}
           CLE_SECRETE: ${{ secrets.AWS_SECRET_KEY }}
         run: |
-          echo "Environnement applicatif : $ENV_SIMPLE"
-          echo "Clé AWS récupérée : $CLE_SECRETE"
+          echo "🚀 Lancement du déploiement vers : $ENV_CIBLE"
+          echo "Clé AWS injectée : $CLE_SECRETE"
