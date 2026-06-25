@@ -10,7 +10,7 @@
   "jest-junit": {
     "outputDirectory": "./",
     "outputName": "junit.xml"
-  }
+  },
   "dependencies": {
     "express": "^4.19.2"
   },
