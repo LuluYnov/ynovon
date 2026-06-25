@@ -1,0 +1,27 @@
+name: "Application Pipeline"
+
+on:
+  push:
+
+jobs:
+  validate-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1 : Cloner le code source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Étape 1.5 : (Recommandé) Configurer Node.js pour le runner
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Étape 2 : Installer les dépendances proprement
+      - name: Install dependencies
+        run: npm ci
+
+      # Étape 3 : Lancer la suite de tests
+      - name: Run tests
+        run: npm test
