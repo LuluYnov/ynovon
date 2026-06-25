@@ -46,4 +46,3 @@ jobs:
         run: |
           echo "Environnement applicatif : $ENV_SIMPLE"
           echo "Clé AWS récupérée : $CLE_SECRETE"
-
