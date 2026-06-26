@@ -1,0 +1,4 @@
+[[rules]]
+id = "corporate-api-token"
+description = "Détection des jetons internes d'entreprise"
+regex = '''(?i)[Mm][Yy][Cc][Oo][Rr][Pp]_[a-zA-Z0-9]{24}'''
