@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const { exec } = require('child_process'); // Utilisé pour introduire une faille SAST
 
-const INTERNAL_TOKEN = "mycorp_secrtok784512963014abcd";
+const INTERNAL_TOKEN = "myCorp_secrtok784512963014abcd";
 const SIMULATED_AWS_KEY = "AKIAIOSFODNN7TRUEMEB";
 
 const app = express();
